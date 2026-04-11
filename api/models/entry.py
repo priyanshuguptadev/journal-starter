@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from typing import Annotated
 from uuid import uuid4
 
-from pydantic import AfterValidator, BaseModel, Field
+from pydantic import BaseModel, Field, StringConstraints
 
 
 def validate_non_empty(value: str) -> str:
@@ -29,47 +29,23 @@ class AnalysisResponse(BaseModel):
 class EntryCreate(BaseModel):
     """Model for creating a new journal entry (user input)"""
 
-    work: Annotated[str, Field(
-        max_length=256,
-        description="What did you work on today?",
-        json_schema_extra={
-            "example": "Studied FastAPI and built my first API endpoints"},
-    ), AfterValidator(validate_non_empty)]
-    struggle: Annotated[str, Field(
-        max_length=256,
-        description="What's one thing you struggled with today?",
-        json_schema_extra={
-            "example": "Understanding async/await syntax and when to use it"},
-    ), AfterValidator(validate_non_empty)]
-    intention: Annotated[str, Field(
-        max_length=256,
-        description="What will you study/work on tomorrow?",
-        json_schema_extra={
-            "example": "Practice PostgreSQL queries and database design"},
-    ), AfterValidator(validate_non_empty)]
+    work: Annotated[str, StringConstraints(
+        min_length=1, strip_whitespace=True, max_length=256)]
+    struggle: Annotated[str, StringConstraints(
+        min_length=1, strip_whitespace=True, max_length=256)]
+    intention: Annotated[str, StringConstraints(
+        min_length=1, strip_whitespace=True, max_length=256)]
 
 
 class EntryUpdate(BaseModel):
     """Model for updating journal entry in db (user input)"""
 
-    work: Annotated[str | None, Field(
-        max_length=256,
-        description="What did you work on today?",
-        json_schema_extra={
-            "example": "Studied FastAPI and built my first API endpoints"},
-    ), AfterValidator(validate_non_empty)] = None
-    struggle: Annotated[str | None, Field(
-        max_length=256,
-        description="What's one thing you struggled with today?",
-        json_schema_extra={
-            "example": "Understanding async/await syntax and when to use it"},
-    ), AfterValidator(validate_non_empty)] = None
-    intention: Annotated[str | None, Field(
-        max_length=256,
-        description="What will you study/work on tomorrow?",
-        json_schema_extra={
-            "example": "Practice PostgreSQL queries and database design"},
-    ), AfterValidator(validate_non_empty)] = None
+    work: Annotated[str | None, StringConstraints(
+        min_length=1, strip_whitespace=True, max_length=256)] = None
+    struggle: Annotated[str | None, StringConstraints(
+        min_length=1, strip_whitespace=True, max_length=256)] = None
+    intention: Annotated[str | None, StringConstraints(
+        min_length=1, strip_whitespace=True, max_length=256)] = None
 
 
 class Entry(BaseModel):
