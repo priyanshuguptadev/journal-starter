@@ -66,7 +66,7 @@ async def update_entry(
     """Update a journal entry"""
 
     # Update journal entry in the db with entry_update payload
-    result = await entry_service.update_entry(entry_id, entry_update.model_dump())
+    result = await entry_service.update_entry(entry_id, entry_update.model_dump(exclude_unset=True))
 
     # Return 404 for entry not found in db
     if not result:
