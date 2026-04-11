@@ -1,5 +1,5 @@
 from datetime import UTC, datetime
-from typing import Annotated, Optional
+from typing import Annotated
 from uuid import uuid4
 
 from pydantic import AfterValidator, BaseModel, Field
@@ -52,19 +52,19 @@ class EntryCreate(BaseModel):
 class EntryUpdate(BaseModel):
     """Model for updating journal entry in db (user input)"""
 
-    work: Annotated[Optional[str], Field(
+    work: Annotated[str | None, Field(
         max_length=256,
         description="What did you work on today?",
         json_schema_extra={
             "example": "Studied FastAPI and built my first API endpoints"},
     ), AfterValidator(validate_non_empty)] = None
-    struggle: Annotated[Optional[str], Field(
+    struggle: Annotated[str | None, Field(
         max_length=256,
         description="What's one thing you struggled with today?",
         json_schema_extra={
             "example": "Understanding async/await syntax and when to use it"},
     ), AfterValidator(validate_non_empty)] = None
-    intention: Annotated[Optional[str], Field(
+    intention: Annotated[str | None, Field(
         max_length=256,
         description="What will you study/work on tomorrow?",
         json_schema_extra={
