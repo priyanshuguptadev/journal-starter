@@ -46,27 +46,17 @@ async def get_all_entries(entry_service: EntryService = Depends(get_entry_servic
 
 @router.get("/entries/{entry_id}")
 async def get_entry(entry_id: str, entry_service: EntryService = Depends(get_entry_service)):
-    """
-    TODO: Implement this endpoint to return a single journal entry by ID
+    """Get journal entry by entry_id"""
 
-    Steps to implement:
-    1. Use entry_service.get_entry(entry_id) to fetch the entry
-    2. If entry is None, raise HTTPException with status_code=404
-    3. Return the entry directly (not wrapped in a dict)
+    # Read journal entry from db with entry_id
+    result = await entry_service.get_entry(entry_id)
 
-    Example response (status 200):
-    {
-        "id": "uuid-string",
-        "work": "...",
-        "struggle": "...",
-        "intention": "...",
-        "created_at": "...",
-        "updated_at": "..."
-    }
+    # Return 404 if entry not found in db
+    if not result:
+        raise HTTPException(status_code=404, detail="Entry not found")
 
-    Hint: Check the update_entry endpoint for similar patterns
-    """
-    raise HTTPException(status_code=501, detail="Not implemented - complete this endpoint!")
+    # Return jounal entry
+    return result
 
 
 @router.patch("/entries/{entry_id}")
@@ -106,7 +96,8 @@ async def delete_entry(entry_id: str, entry_service: EntryService = Depends(get_
 
     Hint: Look at how the update_entry endpoint checks for existence
     """
-    raise HTTPException(status_code=501, detail="Not implemented - complete this endpoint!")
+    raise HTTPException(
+        status_code=501, detail="Not implemented - complete this endpoint!")
 
 
 @router.delete("/entries")
@@ -139,4 +130,5 @@ async def analyze_entry(entry_id: str, entry_service: EntryService = Depends(get
             detail="LLM analysis not yet implemented - see api/services/llm_service.py",
         ) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {e!s}") from e
+        raise HTTPException(
+            status_code=500, detail=f"Analysis failed: {e!s}") from e
