@@ -1,16 +1,4 @@
-"""Task 4: Implement analyze_journal_entry using any OpenAI-compatible API.
-
-This project mandates the OpenAI Python SDK, which works with:
-  - GitHub Models (default, free, no credit card required)
-  - OpenAI proper
-  - Azure OpenAI
-  - Groq, Together, OpenRouter, Fireworks, DeepInfra
-  - Ollama, LM Studio, vLLM (local)
-  - Anthropic via their OpenAI-compat endpoint
-
-Set OPENAI_API_KEY, and optionally OPENAI_BASE_URL and OPENAI_MODEL
-in your .env file. Settings are loaded by ``api.config.Settings``.
-"""
+import json
 
 from openai import AsyncOpenAI
 
@@ -52,17 +40,38 @@ async def analyze_journal_entry(
                 "summary":   str,
                 "topics":    list[str],
             }
-
-    TODO (Task 4):
-      1. If ``client is None``, call ``_default_client()`` to construct one.
-      2. Build a messages list that includes ``entry_text`` somewhere
-         (the unit tests check that the entry text reaches the LLM).
-      3. Call ``client.chat.completions.create(...)`` with a model name
-         (use ``get_settings().openai_model`` — defaults to "gpt-4o-mini").
-      4. Parse the assistant's JSON response with ``json.loads()``.
-      5. Return a dict with ``entry_id``, ``sentiment``, ``summary``, ``topics``.
     """
-    raise NotImplementedError(
-        "Task 4: implement analyze_journal_entry using the openai SDK. "
-        "See tests/test_llm_service.py for the test contract."
+    if not client:
+        client = _default_client()
+
+    settings = get_settings()
+    response = await client.chat.completions.create(
+        model=settings.openai_model,
+        messages=[{"role": "system", "content": "You are a helpful AI assistant. Analyze the user journal entry. Respond strictly in json."},
+                  {"role": "user", "content": entry_text}],
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "sentiment_entry",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "entry_id": {"type": "string"},
+                        "sentiment": {
+                            "type": "string",
+                            "enum": ["positive", "negative", "neutral"]
+                        },
+                        "summary": {"type": "string"},
+                        "topics": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        }
+                    },
+                    "required": ["entry_id", "sentiment", "summary", "topics"],
+                    "additionalProperties": False
+                }
+            }
+        }
     )
+    analysis = json.loads(response.choices[0].message.content or "")
+    return {"entry_id": entry_id, **analysis}
