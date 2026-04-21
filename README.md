@@ -55,6 +55,7 @@ Run these commands on your **host machine** (your local terminal, not inside a c
    ```
 
    **Verify your remote** points to your fork (not `learntocloud`):
+
    ```bash
    git remote -v
    # Should show: origin  https://github.com/YOUR_USERNAME/journal-starter.git
@@ -199,6 +200,7 @@ turn all of them green.
 1. **Create a branch**
 
    [Branches](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches) let you work on features in isolation without affecting the main codebase. From the **project root**, create one for each task:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -210,21 +212,24 @@ turn all of them green.
 3. **Run the tests**
 
    After implementing a feature, run the tests from the **project root** to check if your implementation is correct:
+
    ```bash
    uv run pytest
    ```
-   [pytest](https://docs.pytest.org/) is a testing framework that runs automated tests to verify your code works as expected.
 
+   [pytest](https://docs.pytest.org/) is a testing framework that runs automated tests to verify your code works as expected.
    - **Tests failing?** Read the error messages — they tell you exactly what's wrong (e.g., `assert 501 == 200` means your endpoint is still returning "Not Implemented").
    - **Tests passing?** Great, your implementation is correct! Move on to the next step.
 
    **Example: Before implementing GET /entries/{entry_id}:**
+
    ```
    FAILED tests/test_api.py::TestGetSingleEntry::test_get_entry_by_id_success - assert 501 == 200
    FAILED tests/test_api.py::TestGetSingleEntry::test_get_entry_not_found - assert 501 == 404
    ```
 
    **After implementing it correctly:**
+
    ```
    tests/test_api.py::TestGetSingleEntry::test_get_entry_by_id_success PASSED
    tests/test_api.py::TestGetSingleEntry::test_get_entry_not_found PASSED
@@ -233,12 +238,15 @@ turn all of them green.
    > 💡 **Tip:** Use `uv run pytest -v` for verbose output to see each test's pass/fail status, or `uv run pytest -v --tb=short` to also see concise error details.
 
    **Run the linter** from the **project root** to check code style and catch common mistakes:
+
    ```bash
    uv run ruff check .
    ```
+
    A linter is a tool that analyzes your code for potential errors, bugs, and style issues without running it. [Ruff](https://docs.astral.sh/ruff/) is a fast Python linter that checks for things like unused imports, incorrect syntax, and code that doesn't follow [Python style conventions (PEP 8)](https://pep8.org/).
 
    **Run the formatter** to auto-format your code (CI also checks formatting):
+
    ```bash
    uv run ruff format .
    ```
@@ -246,9 +254,11 @@ turn all of them green.
    > 💡 **Tip:** If you ran `uv run pre-commit install` earlier, both `ruff check` and `ruff format` run automatically on every commit.
 
    **Run the type checker** from the **project root** to ensure proper type annotations:
+
    ```bash
    uv run pyright
    ```
+
    A type checker verifies that your code uses [type hints](https://docs.python.org/3/library/typing.html) correctly. Type hints (like `def get_entry(entry_id: str) -> dict:`) help catch bugs early by ensuring you're passing the right types of data to functions. [Pyright](https://github.com/microsoft/pyright) is Microsoft's fast Python type checker.
 
 4. **Commit and push** (only after tests pass!)
@@ -284,10 +294,10 @@ turn all of them green.
 Every push and pull request runs the GitHub Actions workflow in
 `.github/workflows/ci.yml`, which has two jobs:
 
-| Job  | What it checks | How to reproduce locally |
-|------|----------------|--------------------------|
-| `lint` | `ruff check`, `ruff format --check`, `pyright` | `uv run ruff check . && uv run ruff format --check . && uv run pyright` |
-| `test` | `pytest -v` against a real Postgres 16 service container, with `database_setup.sql` applied | `uv run pytest -v` |
+| Job    | What it checks                                                                              | How to reproduce locally                                                |
+| ------ | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `lint` | `ruff check`, `ruff format --check`, `pyright`                                              | `uv run ruff check . && uv run ruff format --check . && uv run pyright` |
+| `test` | `pytest -v` against a real Postgres 16 service container, with `database_setup.sql` applied | `uv run pytest -v`                                                      |
 
 Both jobs run on every push to `main` and every PR. Your fork will
 show two green checks on a PR once **all** your implementations are complete
@@ -377,27 +387,27 @@ verify the CLI is installed.
 
 ### What the automated tests cover
 
-| Task | Automated? | How the tests verify it |
-|------|------------|-------------------------|
-| 1 — Logging | ✅ | `tests/test_logging.py` inspects the root logger state after importing `api.main` |
-| 2a — GET single | ✅ | `tests/test_api.py::TestGetSingleEntry` via the FastAPI test client |
-| 2b — DELETE single | ✅ | `tests/test_api.py::TestDeleteEntry` via the FastAPI test client |
-| 3 — Input validation | ✅ | `tests/test_models.py` unit tests + `tests/test_api.py::TestUpdateEntry` PATCH validation tests |
-| 4 — AI analysis | ✅ | `tests/test_llm_service.py` injects `MockAsyncOpenAI`; no real network calls |
-| 5 — Cloud CLI | ❌ | Manual verification: run `az --version` / `aws --version` / `gcloud --version` in the rebuilt devcontainer |
+| Task                 | Automated? | How the tests verify it                                                                                    |
+| -------------------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
+| 1 — Logging          | ✅         | `tests/test_logging.py` inspects the root logger state after importing `api.main`                          |
+| 2a — GET single      | ✅         | `tests/test_api.py::TestGetSingleEntry` via the FastAPI test client                                        |
+| 2b — DELETE single   | ✅         | `tests/test_api.py::TestDeleteEntry` via the FastAPI test client                                           |
+| 3 — Input validation | ✅         | `tests/test_models.py` unit tests + `tests/test_api.py::TestUpdateEntry` PATCH validation tests            |
+| 4 — AI analysis      | ✅         | `tests/test_llm_service.py` injects `MockAsyncOpenAI`; no real network calls                               |
+| 5 — Cloud CLI        | ❌         | Manual verification: run `az --version` / `aws --version` / `gcloud --version` in the rebuilt devcontainer |
 
 ## 📊 Data Schema
 
 Each journal entry follows this structure:
 
-| Field       | Type      | Description                                | Validation                   |
-|-------------|-----------|--------------------------------------------|------------------------------|
-| id          | string    | Unique identifier (UUID)                   | Auto-generated               |
-| work        | string    | What did you work on today?                | Required, max 256 characters |
-| struggle    | string    | What's one thing you struggled with today? | Required, max 256 characters |
-| intention   | string    | What will you study/work on tomorrow?      | Required, max 256 characters |
-| created_at  | datetime  | When entry was created                     | Auto-generated UTC           |
-| updated_at  | datetime  | When entry was last updated                | Auto-updated UTC             |
+| Field      | Type     | Description                                | Validation                   |
+| ---------- | -------- | ------------------------------------------ | ---------------------------- |
+| id         | string   | Unique identifier (UUID)                   | Auto-generated               |
+| work       | string   | What did you work on today?                | Required, max 256 characters |
+| struggle   | string   | What's one thing you struggled with today? | Required, max 256 characters |
+| intention  | string   | What will you study/work on tomorrow?      | Required, max 256 characters |
+| created_at | datetime | When entry was created                     | Auto-generated UTC           |
+| updated_at | datetime | When entry was last updated                | Auto-updated UTC             |
 
 ## 🤖 AI Analysis Guide
 
@@ -418,13 +428,13 @@ For **Task 4: AI-Powered Entry Analysis**, your endpoint should return this form
 This project mandates the [OpenAI Python SDK](https://github.com/openai/openai-python),
 which works as a drop-in client for any OpenAI-compatible provider:
 
-| Provider | Cost | Notes |
-|----------|------|-------|
-| **GitHub Models** (default, recommended) | Free | Uses your GitHub account, no credit card needed |
-| OpenAI proper | Paid | Standard api.openai.com |
-| Azure OpenAI | Paid | Your Azure subscription |
-| Groq / Together / OpenRouter / Fireworks / DeepInfra | Varies | All expose OpenAI-compatible endpoints |
-| Ollama / LM Studio / vLLM | Free (local) | Run a model on your own machine |
+| Provider                                             | Cost         | Notes                                           |
+| ---------------------------------------------------- | ------------ | ----------------------------------------------- |
+| **GitHub Models** (default, recommended)             | Free         | Uses your GitHub account, no credit card needed |
+| OpenAI proper                                        | Paid         | Standard api.openai.com                         |
+| Azure OpenAI                                         | Paid         | Your Azure subscription                         |
+| Groq / Together / OpenRouter / Fireworks / DeepInfra | Varies       | All expose OpenAI-compatible endpoints          |
+| Ollama / LM Studio / vLLM                            | Free (local) | Run a model on your own machine                 |
 
 Configure your provider via `.env` — **no GitHub Actions secrets are
 required**, because CI uses an injected mock OpenAI client:
@@ -451,24 +461,29 @@ uv run python -m scripts.verify_llm
 > cloud AI platform (Azure OpenAI, AWS Bedrock, or GCP Vertex AI).
 > Since they all support the OpenAI SDK, the migration is just an
 > environment variable change — no code rewrite needed.
+
 ## 🔧 Troubleshooting
 
 **API won't start?**
+
 - Make sure you're running `./start.sh` from the **project root** inside the dev container
 - Check PostgreSQL is running: `docker ps` (on your **host machine**)
 - Restart the database: `docker restart your-postgres-container-name` (on your **host machine**)
 
 **`pydantic_core._pydantic_core.ValidationError` on startup?**
+
 - One of the required env vars in your `.env` file is missing or mistyped.
   The error message names the field (e.g. `database_url` or `openai_api_key`).
   Add it to `.env` — the defaults in [`.env-sample`](.env-sample) are a good
   starting point — and restart.
 
 **Can't connect to database?**
+
 - Verify `.env` file exists with correct `DATABASE_URL`
 - Restart dev container: `Dev Containers: Rebuild Container`
 
 **Dev container won't open?**
+
 - Ensure Docker Desktop is running
 - Try: `Dev Containers: Rebuild and Reopen in Container`
 
@@ -481,3 +496,5 @@ uv run python -m scripts.verify_llm
 MIT License - see [LICENSE](LICENSE) for details.
 
 Contributions welcome! [Open an issue](https://github.com/learntocloud/journal-starter/issues) to get started.
+
+Mock commit to run CI workflow on forked repo. This commit does not change any code or functionality.
