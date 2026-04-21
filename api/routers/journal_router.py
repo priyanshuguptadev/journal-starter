@@ -61,7 +61,9 @@ async def get_entry(entry_id: str, entry_service: EntryService = Depends(get_ent
 
 @router.patch("/entries/{entry_id}")
 async def update_entry(
-    entry_id: str, entry_update: EntryUpdate, entry_service: EntryService = Depends(get_entry_service)
+    entry_id: str,
+    entry_update: EntryUpdate,
+    entry_service: EntryService = Depends(get_entry_service),
 ):
     """Update a journal entry"""
 
@@ -126,5 +128,4 @@ async def analyze_entry(entry_id: str, entry_service: EntryService = Depends(get
             detail="LLM analysis not yet implemented - see api/services/llm_service.py",
         ) from e
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Analysis failed: {e!s}") from e
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {e!s}") from e

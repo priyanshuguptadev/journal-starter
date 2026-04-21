@@ -47,8 +47,13 @@ async def analyze_journal_entry(
     settings = get_settings()
     response = await client.chat.completions.create(
         model=settings.openai_model,
-        messages=[{"role": "system", "content": "You are a helpful AI assistant. Analyze the user journal entry. Respond strictly in json."},
-                  {"role": "user", "content": entry_text}],
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a helpful AI assistant. Analyze the user journal entry. Respond strictly in json.",
+            },
+            {"role": "user", "content": entry_text},
+        ],
         response_format={
             "type": "json_schema",
             "json_schema": {
@@ -59,19 +64,16 @@ async def analyze_journal_entry(
                         "entry_id": {"type": "string"},
                         "sentiment": {
                             "type": "string",
-                            "enum": ["positive", "negative", "neutral"]
+                            "enum": ["positive", "negative", "neutral"],
                         },
                         "summary": {"type": "string"},
-                        "topics": {
-                            "type": "array",
-                            "items": {"type": "string"}
-                        }
+                        "topics": {"type": "array", "items": {"type": "string"}},
                     },
                     "required": ["entry_id", "sentiment", "summary", "topics"],
-                    "additionalProperties": False
-                }
-            }
-        }
+                    "additionalProperties": False,
+                },
+            },
+        },
     )
     analysis = json.loads(response.choices[0].message.content or "")
     return {"entry_id": entry_id, **analysis}
